@@ -78,10 +78,12 @@ const (
 	optionLogOutput            = "LogOutput"
 	optionLogOutputDefault     = false
 
-	optionRunWait      = "RunWait"
-	optionReloadSignal = "ReloadSignal"
-	optionPIDFile      = "PIDFile"
-	optionRestart      = "Restart"
+	optionRunWait            = "RunWait"
+	optionReloadSignal       = "ReloadSignal"
+	optionPIDFile            = "PIDFile"
+	optionRestart            = "Restart"
+	optionLimitNOFILE        = "LimitNOFILE"
+	optionLimitNOFILEDefault = -1 // -1 = don't set in configuration
 
 	optionSuccessExitStatus = "SuccessExitStatus"
 
@@ -141,6 +143,7 @@ type Config struct {
 	//    - RunWait       func() (wait for SIGNAL)  - Do not install signal but wait for this function to return.
 	//    - ReloadSignal  string () [USR1, ...]     - Signal to send on reaload.
 	//    - PIDFile       string () [/run/prog.pid] - Location of the PID file.
+	//    - LimitNOFILE	  int - Maximum open files (ulimit -n) (https://serverfault.com/questions/628610/increasing-nproc-for-processes-launched-by-systemd-on-centos-7)
 	//    - LogOutput     bool   (false)            - Redirect StdErr & StdOut to files.
 	//    - Restart       string (always)           - How shall service be restarted.
 	//    - SuccessExitStatus string ()             - The list of exit status that shall be considered as successful,

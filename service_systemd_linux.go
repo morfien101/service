@@ -152,6 +152,7 @@ func (s *systemd) Install() error {
 		Restart              string
 		SuccessExitStatus    string
 		LogOutput            bool
+		LimitNOFILE          int
 	}{
 		s.Config,
 		path,
@@ -161,6 +162,7 @@ func (s *systemd) Install() error {
 		s.Option.string(optionRestart, "always"),
 		s.Option.string(optionSuccessExitStatus, ""),
 		s.Option.bool(optionLogOutput, optionLogOutputDefault),
+		s.Option.int(optionLimitNOFILE, optionLimitNOFILEDefault),
 	}
 
 	err = s.template().Execute(f, to)
@@ -260,6 +262,7 @@ ExecStart={{.Path|cmdEscape}}{{range .Arguments}} {{.|cmd}}{{end}}
 {{if .UserName}}User={{.UserName}}{{end}}
 {{if .ReloadSignal}}ExecReload=/bin/kill -{{.ReloadSignal}} "$MAINPID"{{end}}
 {{if .PIDFile}}PIDFile={{.PIDFile|cmd}}{{end}}
+{{if gt .LimitNOFILE -1 }}LimitNOFILE={{.LimitNOFILE}}{{end}}
 {{if and .LogOutput .HasOutputFileSupport -}}
 StandardOutput=file:/var/log/{{.Name}}.out
 StandardError=file:/var/log/{{.Name}}.err

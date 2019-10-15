@@ -5,9 +5,12 @@
 package service
 
 import (
+	"bufio"
 	"os"
 	"strings"
 )
+
+var cgroupFile = "/proc/1/cgroup"
 
 type linuxSystemService struct {
 	name        string
@@ -61,8 +64,42 @@ func init() {
 }
 
 func isInteractive() (bool, error) {
-	// TODO: This is not true for user services.
+	inContainer, err := isInContainer(cgroupFile)
+	if err != nil {
+		return false, err
+	}
+
+	if inContainer {
+		return inContainer, nil
+	}
+
 	return os.Getppid() != 1, nil
+}
+
+// isInContainer checks if the service is being executed in docker or lxc
+// container.
+func isInContainer(cgroupPath string) (bool, error) {
+	const maxlines = 5 // maximum lines to scan
+
+	f, err := os.Open(cgroupPath)
+	if err != nil {
+		return false, err
+	}
+	defer f.Close()
+	scan := bufio.NewScanner(f)
+
+	lines := 0
+	for scan.Scan() && !(lines > maxlines) {
+		if strings.Contains(scan.Text(), "docker") || strings.Contains(scan.Text(), "lxc") {
+			return true, nil
+		}
+		lines++
+	}
+	if err := scan.Err(); err != nil {
+		return false, err
+	}
+
+	return false, nil
 }
 
 var tf = map[string]interface{}{

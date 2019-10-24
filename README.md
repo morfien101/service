@@ -39,7 +39,7 @@ var (
 )
 
 func main() {
-	flag.Parse()
+	digestFlags()
 
 	svcConfig := &service.Config{
 		Name:        "test_restarter",
